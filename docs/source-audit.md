@@ -11,7 +11,13 @@
 
 ## قرار v0
 
-نبدأ بالـmetadata audit فقط. لا تُنزل البيانات إلا بعد تحويل المصدر إلى `approved_research` أو `approved_redistributable` وتسجيل رابط الإصدار وhash وسياسة الاستخدام.
+نبدأ بالـmetadata audit فقط. السجل الآلي موجود في `configs/data/source_audits.json`، وجميع القرارات الحالية `blocked_pending_review`. لا تُنزل البيانات إلا بعد تحويل المصدر إلى `approved_research` أو `approved_redistributable` وتسجيل رابط الإصدار وhash وسياسة الاستخدام.
+
+للتحقق من اكتمال السجل:
+
+```text
+python scripts/validate_source_audit.py configs/data/sources.json configs/data/source_audits.json
+```
 
 ## مصادر المراجعة
 

@@ -1,0 +1,80 @@
+{
+  "audit_version": "0.1.0",
+  "legal_note": "Engineering pre-audit only; not legal approval.",
+  "audits": [
+    {
+      "source_id": "openiti-release",
+      "checked_at": "2026-09-22",
+      "reviewer": "engineering-precheck",
+      "evidence_urls": [
+        "https://github.com/OpenITI/RELEASE",
+        "https://kitab-project.org/docs/openITI",
+        "https://zenodo.org/records/17767721"
+      ],
+      "observed_license": "mixed-per-source",
+      "observed_permissions": ["versioned_release", "metadata_available"],
+      "findings": [
+        "The release provides machine-readable metadata and snapshots.",
+        "Rights must be checked per text/source and are not inferred from the corpus name.",
+        "The proposed Arabic subset has not been selected or downloaded."
+      ],
+      "decision": "blocked_pending_review",
+      "next_action": "Select a small Arabic-only sample and audit each source record before ingest."
+    },
+    {
+      "source_id": "quranic-arabic-corpus",
+      "checked_at": "2026-09-22",
+      "reviewer": "engineering-precheck",
+      "evidence_urls": [
+        "https://corpus.quran.com/download/",
+        "https://corpus.quran.com/license.jsp",
+        "https://corpus.quran.com/faq.jsp"
+      ],
+      "observed_license": "GPL-3.0-with-project-use-constraints",
+      "observed_permissions": ["download_available", "attribution_required"],
+      "findings": [
+        "Morphological and syntactic annotations are available from the official project.",
+        "The FAQ states research/non-commercial restrictions that require legal interpretation.",
+        "The source is isolated from commercial-safe training."
+      ],
+      "decision": "blocked_pending_review",
+      "next_action": "Use only as a research/evaluation candidate after license review; do not add to redistributable training."
+    },
+    {
+      "source_id": "ud-arabic-nyuad",
+      "checked_at": "2026-09-22",
+      "reviewer": "engineering-precheck",
+      "evidence_urls": [
+        "https://universaldependencies.org/treebanks/ar_nyuad/index.html",
+        "https://universaldependencies.org/contributing/licensing.html"
+      ],
+      "observed_license": "CC-BY-SA-4.0-annotations",
+      "observed_permissions": ["annotation_license_visible", "underlying_text_separate"],
+      "findings": [
+        "The treebank is suitable as an evaluation/annotation candidate.",
+        "The underlying text is not included and requires separate rights.",
+        "It is not approved for language-model pretraining."
+      ],
+      "decision": "blocked_pending_review",
+      "next_action": "Pin a release and use annotations only after confirming source-text access and evaluation policy."
+    },
+    {
+      "source_id": "alkhalil-modern-candidate",
+      "checked_at": "2026-09-22",
+      "reviewer": "engineering-precheck",
+      "evidence_urls": [
+        "https://alkhalil.oujda-nlp-team.net/AlkhalilCorpora.php",
+        "https://aclanthology.org/2026.abjadnlp-1.27.pdf"
+      ],
+      "observed_license": "pending-license-audit",
+      "observed_permissions": ["provider_page_found", "corpus_description_found"],
+      "findings": [
+        "The provider describes modern MSA corpora and a lemmatized subcorpus.",
+        "A usable training license and source-level provenance are not yet recorded in this project.",
+        "The source remains a candidate and has not been downloaded."
+      ],
+      "decision": "blocked_pending_review",
+      "next_action": "Obtain and verify the exact release license, source provenance, and derived-model rights."
+    }
+  ]
+}
