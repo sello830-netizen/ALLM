@@ -11,3 +11,4 @@
 - إضافة بوابة `phase1_local_check.py` لتشغيل التحقق المحلي الكامل من أمر واحد.
 - إنشاء مستودع Git محلي وإضافة Notebook وتعليمات تشغيل المرحلة الأولى على Colab.
 - جعل إعادة تشغيل reference baseline آمنة عند تطابق metadata بدل اعتبارها run مكررًا فاشلًا.
+- إضافة PyTorch tiny Transformer اختياري وخلية Colab لتسجيل أول neural smoke run على T4.

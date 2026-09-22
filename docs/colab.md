@@ -14,6 +14,7 @@
 4. ضع رابط المستودع في `REPO_URL`، ولا تضع token أو secret داخل الدفتر.
 5. شغّل الخلايا بالترتيب.
 6. راجع `reports/phase1-colab.json` و`runs-colab.jsonl`.
+7. بعد ظهور T4 عبر `nvidia-smi`، شغّل خلية neural baseline لتثبيت PyTorch وحفظ `artifacts/torch-tiny-baseline.pt`.
 
 ## البيانات الخاصة
 
@@ -21,4 +22,4 @@
 
 ## نطاق الدفتر الحالي
 
-الدفتر يشغل بوابة المرحلة الأولى وreference baseline فقط. إضافة Transformer/PyTorch تكون في مرحلة لاحقة بعد تثبيت قرار GPU وبيئة التدريب.
+الدفتر يشغل بوابة المرحلة الأولى وreference baseline، ثم يتيح tiny PyTorch Transformer smoke test عند توفر T4. الـfixture الصغير لا يمثل تدريبًا بحثيًا نهائيًا.
