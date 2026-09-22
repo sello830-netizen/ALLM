@@ -43,7 +43,7 @@ python scripts/audit_sources.py configs/data/sources.json
 python scripts/validate_source_audit.py configs/data/sources.json configs/data/source_audits.json
 ```
 
-كل المصادر الحالية `proposed` ومرفوضة آليًا للتدريب حتى يكتمل تدقيق الترخيص، ولكل مصدر pre-audit موثق بالأدلة.
+كل المصادر الحالية `proposed` ومرفوضة آليًا للتدريب حتى يكتمل تدقيق الترخيص، ولكل مصدر pre-audit موثق بالأدلة. تم تجهيز OpenITI metadata pilot من 100 سجل دون تنزيل النصوص.
 
 ## المبدأ
 

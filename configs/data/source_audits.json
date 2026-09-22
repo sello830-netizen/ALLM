@@ -16,7 +16,8 @@
       "findings": [
         "The release provides machine-readable metadata and snapshots.",
         "Rights must be checked per text/source and are not inferred from the corpus name.",
-        "The proposed Arabic subset has not been selected or downloaded."
+        "Metadata snapshot was fetched for a 100-record Arabic pilot; text files were not downloaded.",
+        "The pilot remains candidate-only and cannot pass the license gate."
       ],
       "decision": "blocked_pending_review",
       "next_action": "Select a small Arabic-only sample and audit each source record before ingest."
