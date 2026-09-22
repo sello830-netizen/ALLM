@@ -35,8 +35,8 @@ def main() -> int:
         tokens=sum(len(sequence) for sequence in sequences),
         metrics={"mean_perplexity": perplexity},
     )
-    RunRegistry(args.registry).append(run)
-    print(json.dumps(run.to_dict(), ensure_ascii=False, indent=2))
+    recorded_run = RunRegistry(args.registry).append_once(run)
+    print(json.dumps(recorded_run.to_dict(), ensure_ascii=False, indent=2))
     return 0
 
 

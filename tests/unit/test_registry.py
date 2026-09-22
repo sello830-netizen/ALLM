@@ -26,6 +26,7 @@ class RegistryTests(unittest.TestCase):
             )
             registry.append(run)
             self.assertEqual(registry.get("run-001"), run)
+            self.assertEqual(registry.append_once(run), run)
             registry.assert_lineage(
                 "run-001",
                 dataset_hash="dataset",

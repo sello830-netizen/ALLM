@@ -22,6 +22,21 @@ class RunRegistry:
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(run.to_dict(), ensure_ascii=False, sort_keys=True) + "\n")
 
+    def append_once(self, run: Run) -> Run:
+        """Append a run, or return the existing identical run on a safe retry."""
+        try:
+            existing = self.get(run.run_id)
+        except KeyError:
+            self.append(run)
+            return run
+        expected = run.to_dict()
+        actual = existing.to_dict()
+        expected.pop("created_at", None)
+        actual.pop("created_at", None)
+        if actual != expected:
+            raise ValueError(f"run ID exists with different metadata: {run.run_id}")
+        return existing
+
     def list(self) -> list[Run]:
         if not self.path.exists():
             return []
