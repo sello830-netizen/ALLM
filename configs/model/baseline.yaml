@@ -1,0 +1,11 @@
+model:
+  id: arabic-causal-baseline
+  version: 0.1.0
+  architecture: decoder-only
+  context_length: 256
+  parameters: TBD-after-resource-check
+training:
+  seed: 17
+  steps: TBD-after-smoke-test
+  tokens: TBD-after-dataset-manifest
+  precision: TBD-after-hardware-check

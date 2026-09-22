@@ -1,0 +1,12 @@
+dataset:
+  id: arabic-mini
+  version: 0.1.0
+  source_policy: licensed-only
+  keep_raw: true
+  normalization: conservative
+  split:
+    strategy: source-and-time-holdout
+    seed: 17
+  deduplication:
+    exact: true
+    near_duplicate: false

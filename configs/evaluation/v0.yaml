@@ -1,0 +1,12 @@
+evaluation:
+  id: evaluation-v0
+  categories:
+    - fluency
+    - morphology
+    - syntax
+    - generation
+    - safety
+  test_policy:
+    frozen: true
+    use_for_training_selection: false
+    human_review: required-before-release

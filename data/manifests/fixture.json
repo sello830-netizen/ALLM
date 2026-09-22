@@ -1,0 +1,35 @@
+{
+  "release": {
+    "dataset_id": "arabic-mini",
+    "version": "0.1.0",
+    "manifest_hash": "8573a5994ca54fb6daccbf9d9de44f1fcaabc4d4f704c1edebb7985bceb03bc0",
+    "document_count": 2,
+    "token_count": 8,
+    "source_ids": [
+      "local-fixture"
+    ],
+    "created_at": "2026-09-22T06:24:41.147726+00:00"
+  },
+  "documents": [
+    {
+      "document_id": "fixture-001",
+      "source_id": "local-fixture",
+      "license": "internal-test",
+      "domain": "general",
+      "register": "msa",
+      "split": "train",
+      "text_hash": "6f60b9683bf318c752bef89f8b83c52201510b47efd023f3b15981f7297cf0f2",
+      "character_count": 24
+    },
+    {
+      "document_id": "fixture-002",
+      "source_id": "local-fixture",
+      "license": "internal-test",
+      "domain": "general",
+      "register": "msa",
+      "split": "dev",
+      "text_hash": "b6492247a60c0d51d778c7ba410c79893826be0d275d63f4ce3d6d4b19736ae2",
+      "character_count": 24
+    }
+  ]
+}

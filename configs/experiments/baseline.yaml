@@ -1,0 +1,10 @@
+experiment:
+  id: baseline-v0
+  hypothesis: Establish a reproducible surface-form Arabic baseline.
+  primary_variable: model_training
+  controls:
+    - dataset_manifest
+    - tokenizer
+    - evaluation_suite
+    - seed
+  status: planned
