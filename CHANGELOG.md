@@ -12,3 +12,4 @@
 - إنشاء مستودع Git محلي وإضافة Notebook وتعليمات تشغيل المرحلة الأولى على Colab.
 - جعل إعادة تشغيل reference baseline آمنة عند تطابق metadata بدل اعتبارها run مكررًا فاشلًا.
 - إضافة PyTorch tiny Transformer اختياري وخلية Colab لتسجيل أول neural smoke run على T4.
+- إضافة source registry وLicenseGate وسياسة الطبقات الأربع وسجل تدقيق للمصادر دون تنزيل corpus خارجي.

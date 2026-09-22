@@ -1,0 +1,37 @@
+registry_version: 0.1.0
+policy: docs/data-policy.md
+
+layers:
+  - redistributable_train
+  - research_only_train
+  - auxiliary_annotations
+  - gold_evaluation
+
+sources:
+  - source_id: openiti-release
+    release: 2025-1-9
+    layer: research_only_train
+    status: proposed
+    license: mixed-per-source
+    action: select Arabic texts and audit rights per source
+
+  - source_id: quranic-arabic-corpus
+    release: 0.4
+    layer: auxiliary_annotations
+    status: proposed
+    license: GPL-3.0-with-project-use-constraints
+    action: isolate from commercial-safe training pending legal review
+
+  - source_id: ud-arabic-nyuad
+    release: UD-2.x
+    layer: gold_evaluation
+    status: proposed
+    license: CC-BY-SA-4.0-annotations
+    action: use annotations for evaluation only until underlying text rights are verified
+
+  - source_id: alkhalil-modern-candidate
+    release: candidate-2026
+    layer: redistributable_train
+    status: proposed
+    license: pending-license-audit
+    action: do not ingest before license and provenance approval

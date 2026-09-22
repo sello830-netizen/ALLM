@@ -34,6 +34,16 @@ python -m pytest
 
 يوجد دفتر جاهز في `notebooks/colab_phase1.ipynb`، وتعليمات الربط في `docs/colab.md`. يحتاج الدفتر إلى رابط مستودع GitHub؛ لا تضع الأسرار أو البيانات الخاصة داخله.
 
+## مصادر البيانات
+
+تُراجع المصادر عبر `configs/data/sources.json` وسياسة `docs/data-policy.md` قبل التنزيل. يمكن تشغيل:
+
+```text
+python scripts/audit_sources.py configs/data/sources.json
+```
+
+كل المصادر الحالية `proposed` ومرفوضة آليًا للتدريب حتى يكتمل تدقيق الترخيص.
+
 ## المبدأ
 
 كل dataset أو run أو metric يجب أن يرتبط بإصدار الكود والإعدادات والـhashes الخاصة بالبيانات والتقييم. لا يُعدّل run سابق؛ الإعادة تنشئ سجلًا جديدًا.
