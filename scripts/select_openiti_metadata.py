@@ -25,12 +25,26 @@ def _is_arabic(row: dict[str, str]) -> bool:
     return normalized == "ar" or "arab" in normalized or normalized.startswith("ara")
 
 
+def _is_clean_primary_candidate(row: dict[str, str]) -> bool:
+    token_length = row.get("tok_length", "").strip()
+    return (
+        _is_arabic(row)
+        and row.get("status", "").strip().lower() == "pri"
+        and row.get("uncorrected_OCR", "").strip().lower() == "false"
+        and row.get("subcorpus", "").strip() == "ara"
+        and bool(row.get("title_ar", "").strip())
+        and bool(row.get("author_ar", "").strip())
+        and token_length.isdigit()
+        and 1_000 <= int(token_length) <= 500_000
+    )
+
+
 def select_metadata(input_path: Path, output_path: Path, limit: int) -> dict[str, object]:
     with input_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle, delimiter="\t")
         if not reader.fieldnames:
             raise ValueError("metadata file has no header")
-        rows = [row for row in reader if _is_arabic(row)]
+        rows = [row for row in reader if _is_clean_primary_candidate(row)]
 
     records: list[dict[str, object]] = []
     for row in rows:
@@ -54,6 +68,13 @@ def select_metadata(input_path: Path, output_path: Path, limit: int) -> dict[str
         "license_gate": "blocked_pending_review",
         "selection": {
             "language_filter": "Arabic language metadata only",
+            "quality_filters": [
+                "status=pri",
+                "uncorrected_OCR=False",
+                "subcorpus=ara",
+                "title_ar and author_ar are present",
+                "1000 <= tok_length <= 500000",
+            ],
             "deterministic_limit": limit,
             "candidate_count": len(records),
             "selected_count": len(selected),

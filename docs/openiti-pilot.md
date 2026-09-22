@@ -17,8 +17,11 @@ python scripts/select_openiti_metadata.py data/raw/OpenITI_metadata_2025-1-9.tsv
 
 ## النتيجة
 
-- Arabic metadata candidates: `13,375`
+قبل الفلترة كان هناك `13,375` سجلًا عربيًا. بعد الفلترة المحافظة:
+
+- clean primary candidates: `7,402`
 - selected deterministic pilot records: `100`
+- filters: `status=pri`, `uncorrected_OCR=False`, `subcorpus=ara`، وجود العنوان والمؤلف، و`1000 <= tok_length <= 500000`
 - `text_downloaded: false`
 - `license_gate: blocked_pending_review`
 
