@@ -182,10 +182,20 @@ def train_tiny_transformer(
         loss_total += loss_value
 
     mean_loss = loss_total / config.max_steps
+    model.eval()
+    with torch.no_grad():
+        train_inputs = [pair[0] for pair in train_pairs]
+        train_targets = [pair[1] for pair in train_pairs]
+        train_input_batch = nn.utils.rnn.pad_sequence(train_inputs, batch_first=True, padding_value=vocabulary.pad_id).to(device)
+        train_target_batch = nn.utils.rnn.pad_sequence(train_targets, batch_first=True, padding_value=vocabulary.pad_id).to(device)
+        train_logits = model(train_input_batch)
+        train_final_loss = criterion(train_logits.reshape(-1, train_logits.size(-1)), train_target_batch.reshape(-1))
     metrics = {
         "loss": mean_loss,
         "perplexity": math.exp(mean_loss),
         "last_batch_loss": loss_value,
+        "train_final_loss": float(train_final_loss.detach().cpu()),
+        "train_final_perplexity": math.exp(float(train_final_loss.detach().cpu())),
         "train_steps": float(config.max_steps),
         "train_examples": float(len(train_pairs)),
         "effective_epochs": (config.max_steps * config.batch_size) / len(train_pairs),
