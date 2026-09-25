@@ -18,3 +18,4 @@
 - إضافة تحميل checkpoint وواجهة inference وخلية Colab لتوليد نص smoke من النموذج المحفوظ.
 - إضافة synthetic multi-view pilot من 35 جملة مع JSON schema، export نصي، وتحقق original-only.
 - إضافة split حتمي 28/3/4 وتدريب tiny baseline بميزانية steps/batch وdev evaluation.
+- إضافة OOV rate وknown-token perplexity وتسجيل commit الحقيقي في neural runs لتفسير dev metrics بدقة.

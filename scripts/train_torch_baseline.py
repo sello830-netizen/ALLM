@@ -4,6 +4,7 @@ import argparse
 import json
 from dataclasses import replace
 from pathlib import Path
+import subprocess
 
 from allm.domain import Run, RunStatus, stable_hash
 from allm.registry import RunRegistry
@@ -30,12 +31,18 @@ def main() -> int:
     config = replace(TorchBaselineConfig(), max_steps=args.max_steps, batch_size=args.batch_size)
     model, vocabulary, metrics, device = train_tiny_transformer(texts, config, eval_texts=dev_texts)
     dataset_hash = stable_hash(texts)
+    try:
+        code_revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[1], text=True
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        code_revision = "working-tree"
     config_hash = stable_hash({"config": config.__dict__, "torch": torch.__version__})
     run = Run(
         run_id=f"torch-{dataset_hash[:12]}-{config.version}",
         experiment_id="torch-tiny-baseline-v0",
         status=RunStatus.COMPLETED,
-        code_revision="working-tree",
+        code_revision=code_revision,
         config_hash=config_hash,
         dataset_hash=dataset_hash,
         tokenizer_hash=stable_hash(vocabulary.to_dict()),

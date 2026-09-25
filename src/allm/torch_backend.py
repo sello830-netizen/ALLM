@@ -71,6 +71,16 @@ class Vocabulary:
         return {"itos": self.itos, "stoi": self.stoi}
 
 
+def vocabulary_oov_rate(texts: list[str], vocabulary: Vocabulary) -> float:
+    """Measure held-out token coverage without changing the vocabulary."""
+    tokenizer = BaselineTokenizer()
+    tokens = [token for text in texts for token in tokenizer.tokenize(text)]
+    if not tokens:
+        return 0.0
+    unknown = sum(token not in vocabulary.stoi for token in tokens)
+    return unknown / len(tokens)
+
+
 def _torch():
     try:
         import torch
@@ -174,6 +184,10 @@ def train_tiny_transformer(
         "perplexity": math.exp(loss_value),
         "train_steps": float(config.max_steps),
     }
+    if eval_texts:
+        eval_tokens = [token for text in eval_texts for token in tokenizer.tokenize(text)]
+        metrics["eval_oov_rate"] = vocabulary_oov_rate(eval_texts, vocabulary)
+        metrics["eval_token_count"] = float(len(eval_tokens))
     if eval_pairs:
         model.eval()
         with torch.no_grad():
@@ -183,8 +197,16 @@ def train_tiny_transformer(
             eval_target_batch = nn.utils.rnn.pad_sequence(eval_targets, batch_first=True, padding_value=vocabulary.pad_id).to(device)
             eval_logits = model(eval_input_batch)
             eval_loss = criterion(eval_logits.reshape(-1, eval_logits.size(-1)), eval_target_batch.reshape(-1))
+            known_targets = eval_target_batch.clone()
+            known_targets[known_targets == vocabulary.stoi["<unk>"]] = vocabulary.pad_id
+            known_token_count = int((known_targets != vocabulary.pad_id).sum().item())
+            known_loss = criterion(eval_logits.reshape(-1, eval_logits.size(-1)), known_targets.reshape(-1))
         metrics["eval_loss"] = float(eval_loss.detach().cpu())
         metrics["eval_perplexity"] = math.exp(metrics["eval_loss"])
+        metrics["eval_known_token_count"] = float(known_token_count)
+        if known_token_count:
+            metrics["eval_known_loss"] = float(known_loss.detach().cpu())
+            metrics["eval_known_perplexity"] = math.exp(metrics["eval_known_loss"])
     return model, vocabulary, metrics, device
 
 
