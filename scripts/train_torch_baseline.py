@@ -39,7 +39,7 @@ def main() -> int:
         code_revision = "working-tree"
     config_hash = stable_hash({"config": config.__dict__, "torch": torch.__version__})
     run = Run(
-        run_id=f"torch-{dataset_hash[:12]}-{config.version}",
+        run_id=f"torch-{dataset_hash[:12]}-{config.version}-{code_revision[:12]}-{config_hash[:8]}",
         experiment_id="torch-tiny-baseline-v0",
         status=RunStatus.COMPLETED,
         code_revision=code_revision,
