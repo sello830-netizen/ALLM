@@ -12,6 +12,7 @@ def split_records(
     seed: int = 17,
     train_ratio: float = 0.8,
     dev_ratio: float = 0.1,
+    stratify_by: str | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     records = list(records)
     if not records:
@@ -23,6 +24,25 @@ def split_records(
         raise ValueError("every record requires source_id")
     if len(set(source_ids)) != len(source_ids):
         raise ValueError("source IDs must be unique before splitting")
+    if stratify_by is not None:
+        groups: dict[str, list[dict[str, Any]]] = {}
+        for record in records:
+            groups.setdefault(str(record.get(stratify_by, "")), []).append(record)
+        if any(not key for key in groups):
+            raise ValueError(f"every record requires stratification field: {stratify_by}")
+        result = {"train": [], "dev": [], "test": []}
+        for key in sorted(groups):
+            group_split = split_records(
+                groups[key],
+                seed=seed,
+                train_ratio=train_ratio,
+                dev_ratio=dev_ratio,
+            )
+            for split_name in result:
+                result[split_name].extend(group_split[split_name])
+        for split_name in result:
+            result[split_name].sort(key=lambda record: str(record["source_id"]))
+        return result
 
     ordered = sorted(
         records,

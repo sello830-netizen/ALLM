@@ -10,5 +10,6 @@ reports/*.json
 reports/*.jsonl
 data/raw/
 data/processed/
+TEMP/
 artifacts/
 checkpoints/

@@ -20,3 +20,4 @@
 - إضافة split حتمي 28/3/4 وتدريب tiny baseline بميزانية steps/batch وdev evaluation.
 - إضافة OOV rate وknown-token perplexity وتسجيل commit الحقيقي في neural runs لتفسير dev metrics بدقة.
 - جعل run_id يتضمن dataset/version/commit/config لتجنب حذف registry عند تغير الكود.
+- إضافة JSONL corpus pilot validator وتقسيم طبقي حسب domain إلى 400/50/50 للاختبار المنضبط.
