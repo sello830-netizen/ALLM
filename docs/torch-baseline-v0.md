@@ -21,3 +21,14 @@
 ```
 
 يجب أن يسجل run جديدًا ويحفظ checkpoint. لا يُستخدم fixture الصغير للحكم البحثي؛ الغرض هو إثبات سلامة دورة التدريب والتتبع.
+
+## inference من checkpoint
+
+```python
+!python scripts/generate_torch.py \
+  /content/drive/MyDrive/ALLM-artifacts/torch-tiny-baseline.pt \
+  "هذه" \
+  --max-new-tokens 20
+```
+
+الناتج smoke-only لأن النموذج تدرب على fixture صغير؛ لا يمثل جودة العربية العامة.

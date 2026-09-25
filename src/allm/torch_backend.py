@@ -47,6 +47,24 @@ class Vocabulary:
         unknown = self.stoi["<unk>"]
         return [self.stoi["<bos>"]] + [self.stoi.get(token, unknown) for token in tokens] + [self.stoi["<eos>"]]
 
+    def encode_prompt(self, tokens: list[str]) -> list[int]:
+        unknown = self.stoi["<unk>"]
+        return [self.stoi["<bos>"]] + [self.stoi.get(token, unknown) for token in tokens]
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> "Vocabulary":
+        vocabulary = cls.__new__(cls)
+        vocabulary.itos = list(value["itos"])
+        vocabulary.stoi = {str(token): int(index) for token, index in value["stoi"].items()}
+        return vocabulary
+
+    def decode(self, token_ids: list[int]) -> str:
+        special = {"<pad>", "<unk>", "<bos>", "<eos>"}
+        tokens = [self.itos[index] for index in token_ids if 0 <= index < len(self.itos)]
+        tokens = [token for token in tokens if token not in special]
+        text = " ".join(tokens)
+        return text.replace(" .", ".").replace(" ،", "،").replace(" ؟", "؟").replace(" ؛", "؛")
+
     def to_dict(self) -> dict[str, Any]:
         return {"itos": self.itos, "stoi": self.stoi}
 
@@ -58,6 +76,39 @@ def _torch():
     except ImportError as error:
         raise RuntimeError("PyTorch is required for the neural baseline") from error
     return torch, nn
+
+
+def create_tiny_model(vocab_size: int, config: TorchBaselineConfig):
+    """Build the same architecture used by training and checkpoint loading."""
+    torch, nn = _torch()
+    config.validate()
+
+    class TinyCausalTransformer(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.token_embedding = nn.Embedding(vocab_size, config.d_model)
+            self.position_embedding = nn.Embedding(config.context_length, config.d_model)
+            layer = nn.TransformerEncoderLayer(
+                d_model=config.d_model,
+                nhead=config.nhead,
+                dim_feedforward=config.dim_feedforward,
+                dropout=config.dropout,
+                batch_first=True,
+                norm_first=True,
+            )
+            self.encoder = nn.TransformerEncoder(layer, num_layers=config.num_layers)
+            self.lm_head = nn.Linear(config.d_model, vocab_size)
+
+        def forward(self, token_ids):
+            length = token_ids.size(1)
+            if length > config.context_length:
+                raise ValueError("sequence exceeds configured context length")
+            positions = torch.arange(length, device=token_ids.device).unsqueeze(0)
+            hidden = self.token_embedding(token_ids) + self.position_embedding(positions)
+            mask = torch.triu(torch.ones(length, length, device=token_ids.device, dtype=torch.bool), diagonal=1)
+            return self.lm_head(self.encoder(hidden, mask=mask))
+
+    return TinyCausalTransformer()
 
 
 def train_tiny_transformer(
@@ -84,30 +135,7 @@ def train_tiny_transformer(
     torch.manual_seed(config.seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    class TinyCausalTransformer(nn.Module):
-        def __init__(self):
-            super().__init__()
-            self.token_embedding = nn.Embedding(len(vocabulary.itos), config.d_model)
-            self.position_embedding = nn.Embedding(config.context_length, config.d_model)
-            layer = nn.TransformerEncoderLayer(
-                d_model=config.d_model,
-                nhead=config.nhead,
-                dim_feedforward=config.dim_feedforward,
-                dropout=config.dropout,
-                batch_first=True,
-                norm_first=True,
-            )
-            self.encoder = nn.TransformerEncoder(layer, num_layers=config.num_layers)
-            self.lm_head = nn.Linear(config.d_model, len(vocabulary.itos))
-
-        def forward(self, token_ids):
-            length = token_ids.size(1)
-            positions = torch.arange(length, device=token_ids.device).unsqueeze(0)
-            hidden = self.token_embedding(token_ids) + self.position_embedding(positions)
-            mask = torch.triu(torch.ones(length, length, device=token_ids.device, dtype=torch.bool), diagonal=1)
-            return self.lm_head(self.encoder(hidden, mask=mask))
-
-    model = TinyCausalTransformer().to(device)
+    model = create_tiny_model(len(vocabulary.itos), config).to(device)
     input_batch = input_batch.to(device)
     target_batch = target_batch.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
@@ -133,3 +161,50 @@ def checkpoint_payload(model: Any, vocabulary: Vocabulary, config: TorchBaseline
         "metrics": metrics,
         "device": device,
     }
+
+
+def load_checkpoint(path: str, device: str | None = None) -> tuple[Any, Vocabulary, TorchBaselineConfig, str]:
+    """Load a checkpoint produced by train_torch_baseline."""
+    torch, _ = _torch()
+    requested_device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    if requested_device == "cuda" and not torch.cuda.is_available():
+        requested_device = "cpu"
+    payload = torch.load(path, map_location=requested_device, weights_only=False)
+    config = TorchBaselineConfig(**payload["config"])
+    vocabulary = Vocabulary.from_dict(payload["vocabulary"])
+    model = create_tiny_model(len(vocabulary.itos), config).to(requested_device)
+    model.load_state_dict(payload["model_state_dict"])
+    model.eval()
+    return model, vocabulary, config, requested_device
+
+
+def generate_text(
+    model: Any,
+    vocabulary: Vocabulary,
+    prompt: str,
+    *,
+    max_new_tokens: int = 20,
+    temperature: float = 0.0,
+) -> str:
+    """Generate a short continuation using greedy or temperature sampling."""
+    torch, _ = _torch()
+    if max_new_tokens <= 0:
+        raise ValueError("max_new_tokens must be positive")
+    tokenizer = BaselineTokenizer()
+    token_ids = vocabulary.encode_prompt(tokenizer.tokenize(prompt))
+    device = next(model.parameters()).device
+    generated = torch.tensor([token_ids], dtype=torch.long, device=device)
+    eos_id = vocabulary.stoi["<eos>"]
+    with torch.no_grad():
+        for _ in range(max_new_tokens):
+            context = generated[:, -model.position_embedding.num_embeddings :]
+            logits = model(context)[:, -1, :]
+            if temperature <= 0:
+                next_token = logits.argmax(dim=-1, keepdim=True)
+            else:
+                probabilities = torch.softmax(logits / temperature, dim=-1)
+                next_token = torch.multinomial(probabilities, num_samples=1)
+            generated = torch.cat([generated, next_token], dim=1)
+            if int(next_token.item()) == eos_id:
+                break
+    return vocabulary.decode(generated[0].tolist())

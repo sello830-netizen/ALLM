@@ -15,3 +15,4 @@
 - إضافة source registry وLicenseGate وسياسة الطبقات الأربع وسجل تدقيق للمصادر دون تنزيل corpus خارجي.
 - إضافة SourceAuditRegistry وملف الأدلة والقرارات المبدئية لكل مصدر، مع أداة تحقق تمنع التدقيق الناقص.
 - جلب OpenITI metadata snapshot واختيار pilot عربي حتمي من 100 سجل دون تنزيل النصوص أو تجاوز license gate.
+- إضافة تحميل checkpoint وواجهة inference وخلية Colab لتوليد نص smoke من النموذج المحفوظ.
