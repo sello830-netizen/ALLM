@@ -16,3 +16,4 @@
 - إضافة SourceAuditRegistry وملف الأدلة والقرارات المبدئية لكل مصدر، مع أداة تحقق تمنع التدقيق الناقص.
 - جلب OpenITI metadata snapshot واختيار pilot عربي حتمي من 100 سجل دون تنزيل النصوص أو تجاوز license gate.
 - إضافة تحميل checkpoint وواجهة inference وخلية Colab لتوليد نص smoke من النموذج المحفوظ.
+- إضافة synthetic multi-view pilot من 35 جملة مع JSON schema، export نصي، وتحقق original-only.
