@@ -3,6 +3,8 @@ training:
   experiment_id: torch-tiny-baseline-v0
   seed: 17
   epochs: 3
+  max_steps: 100
+  batch_size: 4
   learning_rate: 0.0003
 model:
   id: arabic-causal-tiny

@@ -20,6 +20,8 @@ class TorchBaselineConfig:
     dim_feedforward: int = 256
     dropout: float = 0.0
     epochs: int = 3
+    max_steps: int = 100
+    batch_size: int = 4
     learning_rate: float = 3e-4
     seed: int = 17
 
@@ -28,7 +30,7 @@ class TorchBaselineConfig:
             raise ValueError("model dimensions are invalid")
         if self.d_model % self.nhead:
             raise ValueError("d_model must be divisible by nhead")
-        if self.num_layers <= 0 or self.epochs <= 0 or self.learning_rate <= 0:
+        if self.num_layers <= 0 or self.epochs <= 0 or self.max_steps <= 0 or self.batch_size <= 0 or self.learning_rate <= 0:
             raise ValueError("training configuration is invalid")
 
 
@@ -112,9 +114,11 @@ def create_tiny_model(vocab_size: int, config: TorchBaselineConfig):
 
 
 def train_tiny_transformer(
-    texts: list[str], config: TorchBaselineConfig | None = None
+    texts: list[str],
+    config: TorchBaselineConfig | None = None,
+    eval_texts: list[str] | None = None,
 ) -> tuple[Any, Vocabulary, dict[str, float], str]:
-    """Train a tiny causal Transformer and return model, vocabulary, metrics, device."""
+    """Train with fixed mini-batches and optionally report held-out loss."""
     torch, nn = _torch()
     config = config or TorchBaselineConfig()
     config.validate()
@@ -126,23 +130,38 @@ def train_tiny_transformer(
     if any(not sequence for sequence in token_sequences):
         raise ValueError("texts must produce at least one token")
     vocabulary = Vocabulary(token_sequences)
-    sequences = [vocabulary.encode(tokens)[: config.context_length + 1] for tokens in token_sequences]
-    inputs = [torch.tensor(sequence[:-1], dtype=torch.long) for sequence in sequences]
-    targets = [torch.tensor(sequence[1:], dtype=torch.long) for sequence in sequences]
-    input_batch = nn.utils.rnn.pad_sequence(inputs, batch_first=True, padding_value=vocabulary.pad_id)
-    target_batch = nn.utils.rnn.pad_sequence(targets, batch_first=True, padding_value=vocabulary.pad_id)
 
+    def encode_sequences(values: list[str]) -> list[tuple[Any, Any]]:
+        pairs = []
+        for value in values:
+            sequence = vocabulary.encode(tokenizer.tokenize(value))[: config.context_length + 1]
+            if len(sequence) < 2:
+                continue
+            pairs.append((torch.tensor(sequence[:-1], dtype=torch.long), torch.tensor(sequence[1:], dtype=torch.long)))
+        return pairs
+
+    train_pairs = encode_sequences(texts)
+    eval_pairs = encode_sequences(eval_texts or [])
     torch.manual_seed(config.seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-
     model = create_tiny_model(len(vocabulary.itos), config).to(device)
-    input_batch = input_batch.to(device)
-    target_batch = target_batch.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
     criterion = nn.CrossEntropyLoss(ignore_index=vocabulary.pad_id)
+    generator = torch.Generator().manual_seed(config.seed)
+    order = torch.randperm(len(train_pairs), generator=generator).tolist()
+    cursor = 0
     model.train()
     loss_value = 0.0
-    for _ in range(config.epochs):
+    for _ in range(config.max_steps):
+        if cursor + config.batch_size > len(order):
+            order = torch.randperm(len(train_pairs), generator=generator).tolist()
+            cursor = 0
+        indices = order[cursor : cursor + config.batch_size]
+        cursor += config.batch_size
+        inputs = [train_pairs[index][0] for index in indices]
+        targets = [train_pairs[index][1] for index in indices]
+        input_batch = nn.utils.rnn.pad_sequence(inputs, batch_first=True, padding_value=vocabulary.pad_id).to(device)
+        target_batch = nn.utils.rnn.pad_sequence(targets, batch_first=True, padding_value=vocabulary.pad_id).to(device)
         optimizer.zero_grad(set_to_none=True)
         logits = model(input_batch)
         loss = criterion(logits.reshape(-1, logits.size(-1)), target_batch.reshape(-1))
@@ -150,7 +169,23 @@ def train_tiny_transformer(
         optimizer.step()
         loss_value = float(loss.detach().cpu())
 
-    return model, vocabulary, {"loss": loss_value, "perplexity": math.exp(loss_value)}, device
+    metrics = {
+        "loss": loss_value,
+        "perplexity": math.exp(loss_value),
+        "train_steps": float(config.max_steps),
+    }
+    if eval_pairs:
+        model.eval()
+        with torch.no_grad():
+            eval_inputs = [pair[0] for pair in eval_pairs]
+            eval_targets = [pair[1] for pair in eval_pairs]
+            eval_input_batch = nn.utils.rnn.pad_sequence(eval_inputs, batch_first=True, padding_value=vocabulary.pad_id).to(device)
+            eval_target_batch = nn.utils.rnn.pad_sequence(eval_targets, batch_first=True, padding_value=vocabulary.pad_id).to(device)
+            eval_logits = model(eval_input_batch)
+            eval_loss = criterion(eval_logits.reshape(-1, eval_logits.size(-1)), eval_target_batch.reshape(-1))
+        metrics["eval_loss"] = float(eval_loss.detach().cpu())
+        metrics["eval_perplexity"] = math.exp(metrics["eval_loss"])
+    return model, vocabulary, metrics, device
 
 
 def checkpoint_payload(model: Any, vocabulary: Vocabulary, config: TorchBaselineConfig, metrics: dict[str, float], device: str) -> dict[str, Any]:

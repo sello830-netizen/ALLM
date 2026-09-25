@@ -29,4 +29,17 @@ python scripts/run_smoke_baseline.py data/fixtures/arabic_multiview_pilot_001.tx
 - لا توجد views مولدة بعد في هذا الإصدار.
 - لا يستخدم هذا dataset لاعتماد architecture أو الادعاء بضغط البيانات.
 
-الخطوة التالية هي بناء views محدودة ومتحققًا منها، ثم مقارنة original-only وmulti-view تحت نفس token/step budget.
+## Original-only baseline المنضبط
+
+تقسيم الوثائق حتمي وبـseed=17:
+
+```text
+28 train / 3 dev / 4 test
+```
+
+```text
+python scripts/prepare_text_splits.py data/fixtures/arabic_multiview_pilot_001.json data/fixtures/arabic_multiview_pilot_001_split
+python scripts/train_torch_baseline.py data/fixtures/arabic_multiview_pilot_001_split/train.txt runs-original-pilot.jsonl artifacts/torch-original-pilot.pt --dev-input data/fixtures/arabic_multiview_pilot_001_split/dev.txt --max-steps 100 --batch-size 4
+```
+
+الـtest لا يستخدم لاختيار النموذج. الخطوة التالية هي بناء views محدودة ومتحققًا منها، ثم مقارنة original-only وmulti-view تحت نفس token/step budget.
