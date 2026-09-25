@@ -162,6 +162,7 @@ def train_tiny_transformer(
     cursor = 0
     model.train()
     loss_value = 0.0
+    loss_total = 0.0
     for _ in range(config.max_steps):
         if cursor + config.batch_size > len(order):
             order = torch.randperm(len(train_pairs), generator=generator).tolist()
@@ -178,11 +179,16 @@ def train_tiny_transformer(
         loss.backward()
         optimizer.step()
         loss_value = float(loss.detach().cpu())
+        loss_total += loss_value
 
+    mean_loss = loss_total / config.max_steps
     metrics = {
-        "loss": loss_value,
-        "perplexity": math.exp(loss_value),
+        "loss": mean_loss,
+        "perplexity": math.exp(mean_loss),
+        "last_batch_loss": loss_value,
         "train_steps": float(config.max_steps),
+        "train_examples": float(len(train_pairs)),
+        "effective_epochs": (config.max_steps * config.batch_size) / len(train_pairs),
     }
     if eval_texts:
         eval_tokens = [token for text in eval_texts for token in tokenizer.tokenize(text)]

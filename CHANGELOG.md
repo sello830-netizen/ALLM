@@ -22,3 +22,4 @@
 - جعل run_id يتضمن dataset/version/commit/config لتجنب حذف registry عند تغير الكود.
 - إضافة JSONL corpus pilot validator وتقسيم طبقي حسب domain إلى 400/50/50 للاختبار المنضبط.
 - نقل `arabic_baseline_corpus_500.jsonl` إلى `data/fixtures/` وتوليد split manifest جاهز للتدريب.
+- تصحيح train loss ليكون متوسط خطوات التدريب وإضافة `last_batch_loss` و`effective_epochs` لتفسير baseline بدقة.
