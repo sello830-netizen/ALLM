@@ -31,14 +31,23 @@ def main() -> int:
     structured: list[str] = []
     for item in annotations:
         original.append(str(item["text"]))
-        structured.append(
-            "TASK_REL "
-            + " | ".join(f"{relation['subject']} -> {relation['predicate']} -> {relation['object']}" for relation in item["relations"])
-            + " TASK_EVENT "
-            + " | ".join(f"{event['type']}:{event['argument']}" for event in item["events"])
-            + " TASK_STATE "
-            + " | ".join(f"{state['entity']}:{state['before']}->{state['after']}" for state in item["states"])
-        )
+        sections: list[str] = []
+        if item["relations"]:
+            sections.append(
+                "TASK_REL "
+                + " | ".join(f"{relation['subject']} -> {relation['predicate']} -> {relation['object']}" for relation in item["relations"])
+            )
+        if item["events"]:
+            sections.append(
+                "TASK_EVENT "
+                + " | ".join(f"{event['type']}:{event['argument']}" for event in item["events"])
+            )
+        if item["states"]:
+            sections.append(
+                "TASK_STATE "
+                + " | ".join(f"{state['entity']}:{state['before']}->{state['after']}" for state in item["states"])
+            )
+        structured.append(" ".join(sections))
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "original.txt").write_text("\n".join(original) + "\n", encoding="utf-8")
     (args.output_dir / "structured.txt").write_text("\n".join(structured) + "\n", encoding="utf-8")
