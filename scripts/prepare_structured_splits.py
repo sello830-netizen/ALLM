@@ -17,7 +17,7 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def serialize_structured(annotation: dict[str, Any]) -> str:
-    sections: list[str] = []
+    sections: list[str] = ["TASK_TEXT " + str(annotation["text"])]
     if annotation["relations"]:
         sections.append(
             "TASK_REL "

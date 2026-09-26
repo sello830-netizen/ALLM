@@ -31,7 +31,7 @@ def main() -> int:
     structured: list[str] = []
     for item in annotations:
         original.append(str(item["text"]))
-        sections: list[str] = []
+        sections: list[str] = ["TASK_TEXT " + str(item["text"])]
         if item["relations"]:
             sections.append(
                 "TASK_REL "
