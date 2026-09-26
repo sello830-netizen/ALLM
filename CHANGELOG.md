@@ -25,3 +25,4 @@
 - تصحيح train loss ليكون متوسط خطوات التدريب وإضافة `last_batch_loss` و`effective_epochs` لتفسير baseline بدقة.
 - إضافة `train_final_loss` و`train_final_perplexity` للمقارنة العادلة مع dev بعد اكتمال التدريب.
 - إضافة Multi-View pilot مضبوط بــoriginal/one-view/multiview وmasked-span view مع token budget manifest.
+- إضافة structured relation/state micro-pilot من 11 سجلًا بحالة proposed_needs_review وبوابة تمنع التدريب قبل المراجعة البشرية.
