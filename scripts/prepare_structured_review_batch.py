@@ -43,12 +43,25 @@ def main() -> int:
         raise ValueError("every corpus record requires domain")
 
     selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
     for domain in sorted(groups):
         ordered = sorted(
             groups[domain],
             key=lambda row: hashlib.sha256(f"{args.seed}:{row['id']}".encode("utf-8")).hexdigest(),
         )
-        selected.extend(ordered[: args.per_domain])
+        existing_rows = [row for row in ordered if str(row["id"]) in existing]
+        domain_rows = existing_rows + [
+            row for row in ordered if str(row["id"]) not in existing and len(existing_rows) < args.per_domain
+        ][: max(0, args.per_domain - len(existing_rows))]
+        selected.extend(domain_rows)
+        selected_ids.update(str(row["id"]) for row in domain_rows)
+
+    # Preserve every existing annotation, even if a domain has more than the minimum.
+    for row in sorted(corpus, key=lambda item: str(item["id"])):
+        source_id = str(row["id"])
+        if source_id in existing and source_id not in selected_ids:
+            selected.append(row)
+            selected_ids.add(source_id)
 
     output_rows: list[dict[str, Any]] = []
     for row in selected:
