@@ -26,3 +26,4 @@
 - إضافة `train_final_loss` و`train_final_perplexity` للمقارنة العادلة مع dev بعد اكتمال التدريب.
 - إضافة Multi-View pilot مضبوط بــoriginal/one-view/multiview وmasked-span view مع token budget manifest.
 - إضافة structured relation/state micro-pilot من 11 سجلًا بحالة proposed_needs_review وبوابة تمنع التدريب قبل المراجعة البشرية.
+- إضافة خيار `--approved-only` لبناء subset فحص دون اعتباره جاهزًا للتدريب.

@@ -34,7 +34,7 @@ python scripts/build_structured_views.py \
   data/fixtures/structured_micro_pilot_views
 ```
 
-الأداة ترفض proposed تلقائيًا حتى لا يدخل annotation غير مراجَع في التدريب. خيار `--allow-proposed` للمعاينة فقط وليس للتدريب.
+الأداة ترفض proposed تلقائيًا حتى لا يدخل annotation غير مراجَع في التدريب. خيار `--approved-only` يبني subset للفحص من السجلات المعتمدة فقط ويضع `training_ready=false`، أما `--allow-proposed` فللمعاينة فقط وليس للتدريب.
 
 ## تصميم المقارنة
 
