@@ -45,4 +45,15 @@ python scripts/build_structured_views.py \
 - Original dev/test يستخدمان لتقييم كل الحالات.
 - لا تُفسر زيادة tokens كتحسن؛ يسجل كل condition token budget الخاص به.
 
+بعد اعتماد كل السجلات يمكن تجهيز split aligned دون تسرب:
+
+```text
+python scripts/prepare_structured_splits.py \
+  data/fixtures/arabic_baseline_corpus_500.jsonl \
+  data/fixtures/structured_micro_pilot_proposed.jsonl \
+  data/fixtures/structured_micro_pilot_split
+```
+
+ينتج لكل split ملفًا أصليًا وملفًا منظمًا مع source IDs وtoken budgets وhashes. الأداة ترفض أي annotation غير approved.
+
 هذه التجربة تختبر explicit supervision محدودًا، لا تدعي أن graph أو المعادلات تضيف معرفة جديدة، ولا تستخدم أرقامًا اعتباطية للكلمات أو الحروف.

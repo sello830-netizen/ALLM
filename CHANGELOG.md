@@ -27,3 +27,4 @@
 - إضافة Multi-View pilot مضبوط بــoriginal/one-view/multiview وmasked-span view مع token budget manifest.
 - إضافة structured relation/state micro-pilot من 11 سجلًا بحالة proposed_needs_review وبوابة تمنع التدريب قبل المراجعة البشرية.
 - إضافة خيار `--approved-only` لبناء subset فحص دون اعتباره جاهزًا للتدريب.
+- إضافة source-level structured split aligned مع original view، وmanifest للـhashes والـtoken budgets وبوابة approved.
